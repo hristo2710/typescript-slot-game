@@ -1,14 +1,14 @@
+
 import { inject, injectable } from 'tsyringe';
 
-import {
-  generateResult,
-  calculateWin,
-} from '../gameLogic';
+import { generateResult } from '../gameLogic';
 
 import type {
   SymbolType,
   GameResult,
 } from '../gameLogic';
+
+import type { WinStrategy } from '../strategies/WinStrategy';
 
 export interface IGameLogic {
   generateResult(): SymbolType[][];
@@ -16,6 +16,25 @@ export interface IGameLogic {
     reels: SymbolType[][],
     bet: number
   ): GameResult;
+}
+
+@injectable()
+export class GameLogic implements IGameLogic {
+  constructor(
+    @inject('WinStrategy')
+    private readonly winStrategy: WinStrategy
+  ) {}
+
+  generateResult(): SymbolType[][] {
+    return generateResult();
+  }
+
+  calculateWin(
+    reels: SymbolType[][],
+    bet: number
+  ): GameResult {
+    return this.winStrategy.calculateWin(reels, bet);
+  }
 }
 
 @injectable()
@@ -34,19 +53,5 @@ export class GameService {
     bet: number
   ): GameResult {
     return this.gameLogic.calculateWin(reels, bet);
-  }
-}
-
-@injectable()
-export class GameLogic implements IGameLogic {
-  generateResult(): SymbolType[][] {
-    return generateResult();
-  }
-
-  calculateWin(
-    reels: SymbolType[][],
-    bet: number
-  ): GameResult {
-    return calculateWin(reels, bet);
   }
 }
